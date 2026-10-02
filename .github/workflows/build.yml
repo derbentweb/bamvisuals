@@ -19,6 +19,22 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Pick latest Fabric versions
+        run: |
+          MC=1.21.11
+          YARN=$(curl -s https://meta.fabricmc.net/v2/versions/yarn/$MC | jq -r '.[0].version')
+          LOADER=$(curl -s https://meta.fabricmc.net/v2/versions/loader | jq -r '[.[] | select(.stable==true)][0].version')
+          API=$(curl -s https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml | grep -o "<version>[^<]*+$MC</version>" | sed 's/<[^>]*>//g' | tail -1)
+          echo "yarn=$YARN loader=$LOADER api=$API"
+          if [ -z "$YARN" ] || [ "$YARN" = "null" ] || [ -z "$LOADER" ] || [ -z "$API" ]; then
+            echo "Could not find versions"; exit 1
+          fi
+          sed -i "s|^yarn_mappings=.*|yarn_mappings=$YARN|" gradle.properties
+          sed -i "s|^loader_version=.*|loader_version=$LOADER|" gradle.properties
+          sed -i "s|^fabric_api_version=.*|fabric_api_version=$API|" gradle.properties
+          sed -i "s|^fabric_version=.*|fabric_version=$API|" gradle.properties
+          cat gradle.properties
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
