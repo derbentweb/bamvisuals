@@ -14,10 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Меню открывается на Right Shift.
- * Слева — вкладки категорий, сверху — поиск, по центру — список функций.
- */
 public class VisualsScreen extends Screen {
     private static final int PANEL_LEFT = 20;
     private static final int PANEL_TOP = 60;
@@ -147,6 +143,7 @@ public class VisualsScreen extends Screen {
 
         renderBackground(context, mouseX, mouseY, delta);
 
+        // === РЕНДЕР МЕНЮ (всё, что у тебя было) ===
         super.render(context, mouseX, mouseY, delta);
 
         // === РЕНДЕР БЛЮРА (только один раз) ===
@@ -157,11 +154,31 @@ public class VisualsScreen extends Screen {
 
         // === Если blur не был нарисован — добавляем свою отрисовку ===
         if (!renderedBlur) {
-            // Здесь должна быть твоя основная отрисовка меню
-            // (вкладки, кнопки, текст и т.д.)
-            // Если у тебя есть свой метод render — вызови его
-            // super.render(context, mouseX, mouseY, delta);
+            // Здесь рисуем свои кнопки, текст, вкладки (всё остальное)
+            int listX = PANEL_LEFT + 110;
+            int listY = PANEL_TOP;
+            int rowIndex = 0;
+
+            for (Feature f : filteredFeatures()) {
+                int y = listY + rowIndex * ROW_HEIGHT - scrollOffset;
+                if (y >= PANEL_TOP - ROW_HEIGHT && y <= height - 20) {
+                    context.drawTextWithShadow(textRenderer, f.getRuName(), listX + 160, y + 2, 0xFFFFFF);
+                    context.drawTextWithShadow(textRenderer, trimTo(f.getRuDescription(), 40),
+                            listX + 160, y + 13, 0xAAAAAA);
+                }
+                rowIndex++;
+            }
+
+            if (waitingForKeybind != null) {
+                context.drawTextWithShadow(textRenderer,
+                        "Нажми клавишу для \"" + waitingForKeybind.getRuName() + "\"...",
+                        PANEL_LEFT, height - 16, 0xFFFF55);
+            }
         }
+    }
+
+    private String trimTo(String s, int max) {
+        return s.length() <= max ? s : s.substring(0, max - 1) + "…";
     }
 
     @Override
