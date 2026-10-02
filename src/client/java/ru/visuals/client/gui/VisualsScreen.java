@@ -138,42 +138,30 @@ public class VisualsScreen extends Screen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         // === ФИКС КРАША "Can only blur once per frame" ===
-        // Blur рисуется ТОЛЬКО один раз за кадр
-        boolean renderedBlur = false;
-
+        // Blur больше не рисуется (никакого класса нет)
         renderBackground(context, mouseX, mouseY, delta);
 
-        // === РЕНДЕР МЕНЮ (всё, что у тебя было) ===
         super.render(context, mouseX, mouseY, delta);
 
-        // === РЕНДЕР БЛЮРА (только один раз) ===
-        if (blurEnabled) {
-            BlurRenderer.renderBlur(context.getMatrices(), 1.0f);
-            renderedBlur = true;
+        // === РИСОВАНИЕ МЕНЮ (то, что у тебя было) ===
+        int listX = PANEL_LEFT + 110;
+        int listY = PANEL_TOP;
+        int rowIndex = 0;
+
+        for (Feature f : filteredFeatures()) {
+            int y = listY + rowIndex * ROW_HEIGHT - scrollOffset;
+            if (y >= PANEL_TOP - ROW_HEIGHT && y <= height - 20) {
+                context.drawTextWithShadow(textRenderer, f.getRuName(), listX + 160, y + 2, 0xFFFFFF);
+                context.drawTextWithShadow(textRenderer, trimTo(f.getRuDescription(), 40),
+                        listX + 160, y + 13, 0xAAAAAA);
+            }
+            rowIndex++;
         }
 
-        // === Если blur не был нарисован — добавляем свою отрисовку ===
-        if (!renderedBlur) {
-            // Здесь рисуем свои кнопки, текст, вкладки (всё остальное)
-            int listX = PANEL_LEFT + 110;
-            int listY = PANEL_TOP;
-            int rowIndex = 0;
-
-            for (Feature f : filteredFeatures()) {
-                int y = listY + rowIndex * ROW_HEIGHT - scrollOffset;
-                if (y >= PANEL_TOP - ROW_HEIGHT && y <= height - 20) {
-                    context.drawTextWithShadow(textRenderer, f.getRuName(), listX + 160, y + 2, 0xFFFFFF);
-                    context.drawTextWithShadow(textRenderer, trimTo(f.getRuDescription(), 40),
-                            listX + 160, y + 13, 0xAAAAAA);
-                }
-                rowIndex++;
-            }
-
-            if (waitingForKeybind != null) {
-                context.drawTextWithShadow(textRenderer,
-                        "Нажми клавишу для \"" + waitingForKeybind.getRuName() + "\"...",
-                        PANEL_LEFT, height - 16, 0xFFFF55);
-            }
+        if (waitingForKeybind != null) {
+            context.drawTextWithShadow(textRenderer,
+                    "Нажми клавишу для \"" + waitingForKeybind.getRuName() + "\"...",
+                    PANEL_LEFT, height - 16, 0xFFFF55);
         }
     }
 
