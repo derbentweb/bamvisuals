@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "ru.visuals.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "FullbrightLightmapMixin",
+    "MinecraftClientMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
